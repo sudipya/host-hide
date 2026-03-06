@@ -58,6 +58,14 @@ docker build -t cartier-java .
 docker run -p 8080:8080 cartier-java
 ```
 
+## Render Hosting (Recommended)
+This repo includes `render.yaml` for one-click deployment of the **Java** backend + UI.
+
+1. Create a Render account.
+2. Click **New** → **Blueprint** → connect this repo.
+3. Render detects `render.yaml` and builds the Docker image from `java/Dockerfile`.
+4. Once deployed, open the provided Render URL.
+
 ## Live Demo Script (90 seconds)
 1. Show clean request → “No attacks detected”.
 2. Click SQLi sample → show evidence (UNION SELECT, comments, tautology).

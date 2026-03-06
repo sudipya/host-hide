@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: cartier-waf
+    runtime: docker
+    plan: free
+    dockerfilePath: java/Dockerfile
+    dockerContext: java
+    envVars:
+      - key: PORT
+        value: 10000
