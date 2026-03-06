@@ -24,6 +24,17 @@
       <main class="grid">
         <section class="panel input-panel">
           <h2>Request Builder</h2>
+          <div class="backend-row">
+            <div class="backend-field">
+              <label>Backend URL</label>
+              <input id="backend" type="text" placeholder="http://localhost:8080" />
+            </div>
+            <div class="backend-actions">
+              <button class="ghost" id="check">Check</button>
+              <span id="status" class="status-pill neutral">Not checked</span>
+            </div>
+          </div>
+
           <label>Method</label>
           <select id="method">
             <option>GET</option>
@@ -43,16 +54,27 @@
 
           <div class="actions">
             <button id="analyze">Analyze Request</button>
+            <button class="ghost" id="copy">Copy cURL</button>
             <button class="ghost" id="clear">Clear</button>
+          </div>
+
+          <div class="preview">
+            <p class="section-label">Request Preview</p>
+            <pre id="preview"></pre>
           </div>
 
           <div class="samples">
             <p class="section-label">Quick samples</p>
             <div class="sample-buttons">
-              <button data-sample="sqli">Load SQLi</button>
-              <button data-sample="xss">Load XSS</button>
-              <button data-sample="ssrf">Load SSRF</button>
-              <button data-sample="rce">Load RCE</button>
+              <button data-sample="clean">Clean</button>
+              <button data-sample="sqli_union">SQLi Union</button>
+              <button data-sample="sqli_boolean">SQLi Boolean</button>
+              <button data-sample="xss_script">XSS Script</button>
+              <button data-sample="xss_event">XSS Event</button>
+              <button data-sample="ssrf_meta">SSRF Metadata</button>
+              <button data-sample="ssrf_file">SSRF File</button>
+              <button data-sample="rce_chain">RCE Chain</button>
+              <button data-sample="rce_subst">RCE Subst</button>
             </div>
           </div>
         </section>

