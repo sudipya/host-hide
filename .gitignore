@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Java
+/java/target/
+*.class
+
+# OS
+.DS_Store

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cartier | Explainable WAF Detection</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Cartier WAF</p>
+          <h1>Explainable Web Attack Detection</h1>
+          <p class="subtitle">Automated detection for SQLi, XSS, SSRF, and RCE with evidence you can act on.</p>
+        </div>
+        <div class="hero-badge">
+          <span>Realtime</span>
+          <span>Evidence-First</span>
+          <span>Hackathon Ready</span>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel input-panel">
+          <h2>Request Builder</h2>
+          <label>Method</label>
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+          </select>
+
+          <label>URL</label>
+          <input id="url" type="text" placeholder="https://shop.example.com/search?q=" />
+
+          <label>Headers</label>
+          <textarea id="headers" rows="4" placeholder="User-Agent: Cartier\nAccept: */*"></textarea>
+
+          <label>Body</label>
+          <textarea id="body" rows="6" placeholder="payload or request body"></textarea>
+
+          <div class="actions">
+            <button id="analyze">Analyze Request</button>
+            <button class="ghost" id="clear">Clear</button>
+          </div>
+
+          <div class="samples">
+            <p class="section-label">Quick samples</p>
+            <div class="sample-buttons">
+              <button data-sample="sqli">Load SQLi</button>
+              <button data-sample="xss">Load XSS</button>
+              <button data-sample="ssrf">Load SSRF</button>
+              <button data-sample="rce">Load RCE</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel results-panel">
+          <h2>Findings</h2>
+          <div id="summary" class="summary"></div>
+          <div id="findings" class="findings"></div>
+        </section>
+      </main>
+
+      <footer>
+        <p>Cartier highlights attack evidence to help defenders respond faster.</p>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
