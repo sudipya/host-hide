@@ -1,0 +1,165 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap");
+
+:root {
+  --bg: #050814;
+  --panel: #0e162b;
+  --accent: #38bdf8;
+  --accent-2: #22d3ee;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --bad: #ef4444;
+  --good: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "IBM Plex Sans", "Trebuchet MS", sans-serif;
+  background: radial-gradient(circle at top left, #0e1a34, #050814 70%);
+  color: var(--text);
+  width: 360px;
+  padding: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.tag {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--accent);
+  color: #081018;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: var(--text);
+}
+
+.input {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--panel);
+  border-radius: 12px;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #0a1224;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--text);
+  resize: vertical;
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.summary {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.summary.safe {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.summary.alert {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.summary h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.summary p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.findings {
+  margin-top: 10px;
+}
+
+.finding {
+  background: #111b33;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--accent);
+}
+
+.finding h4 {
+  margin: 0 0 4px;
+  font-size: 12px;
+}
+
+.finding small {
+  color: var(--muted);
+}
+
+.evidence {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.evidence div {
+  margin-top: 4px;
+  padding: 6px;
+  background: rgba(5, 8, 20, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+footer {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}

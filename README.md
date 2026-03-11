@@ -76,6 +76,15 @@ This repo includes `render.yaml` for one-click deployment of the **Java** backen
 ## Repo Structure
 - `python/` Flask backend + UI
 - `java/` Spark backend + UI
+- `extension/` Chrome extension (client-side analyzer)
+
+## Chrome Extension (Optional)
+1. Open Chrome → `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked** → select the `extension/` folder
+4. Click the HIDE HOST icon and use **Scan Current Tab**
+
+Note: the extension analyzes URLs or pasted requests locally in the popup.
 
 ## Next Steps (if time)
 - Add scoring heatmap

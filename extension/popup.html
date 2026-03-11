@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HIDE HOST</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="logo">HIDE HOST</span>
+        <span class="tag">by Cartier</span>
+      </div>
+      <button id="scan-tab">Scan Current Tab</button>
+    </header>
+
+    <section class="input">
+      <label>Custom Request / URL</label>
+      <textarea id="payload" rows="5" placeholder="Paste a URL or request to analyze"></textarea>
+      <div class="actions">
+        <button id="analyze">Analyze</button>
+        <button id="clear" class="ghost">Clear</button>
+      </div>
+    </section>
+
+    <section class="summary" id="summary">
+      <h3>Ready</h3>
+      <p>Scan a tab or paste a request.</p>
+    </section>
+
+    <section class="findings" id="findings"></section>
+
+    <footer>
+      <small>Client-side detection. No data leaves your browser.</small>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
