@@ -1,6 +1,5 @@
 package com.cartier;
 
-import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.get;
 import static spark.Spark.options;
@@ -71,13 +70,19 @@ public class App {
         });
 
         before((req, res) -> res.header("Access-Control-Allow-Origin", "*"));
-        after((req, res) -> res.type("application/json"));
 
-        get("/health", (req, res) -> GSON.toJson(Map.of("status", "ok", "service", "cartier-waf")));
+        get("/health", (req, res) -> {
+            res.type("application/json");
+            return GSON.toJson(Map.of("status", "ok", "service", "cartier-waf"));
+        });
 
-        get("/api/samples", (req, res) -> GSON.toJson(samplePayloads()));
+        get("/api/samples", (req, res) -> {
+            res.type("application/json");
+            return GSON.toJson(samplePayloads());
+        });
 
         post("/api/analyze", (req, res) -> {
+            res.type("application/json");
             Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
             Map<String, Object> body = GSON.fromJson(req.body(), mapType);
             String method = getString(body, "method");
