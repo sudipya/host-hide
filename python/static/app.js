@@ -1,13 +1,5 @@
 const loadingScreen = document.getElementById("loading");
-const loginScreen = document.getElementById("login");
 const appScreen = document.getElementById("app");
-const loginForm = document.getElementById("login-form");
-const loginUser = document.getElementById("login-user");
-const loginPass = document.getElementById("login-pass");
-const rememberBox = document.getElementById("remember");
-const loginError = document.getElementById("login-error");
-const loginButton = document.getElementById("login-button");
-const skipLoginButton = document.getElementById("skip-login");
 
 const methodField = document.getElementById("method");
 const urlField = document.getElementById("url");
@@ -92,50 +84,11 @@ let loadingComplete = false;
 
 function showLoading() {
   loadingScreen.classList.remove("hidden");
-  loginScreen.classList.add("hidden");
-  appScreen.classList.add("hidden");
-}
-
-function showLogin() {
-  loginScreen.classList.remove("hidden");
   appScreen.classList.add("hidden");
 }
 
 function showApp() {
-  loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
-}
-
-function safeGetStoredAuth() {
-  try {
-    const value = localStorage.getItem("cartierAuth");
-    if (value) {
-      return value;
-    }
-  } catch (error) {
-    // ignore
-  }
-  try {
-    return sessionStorage.getItem("cartierAuth");
-  } catch (error) {
-    return null;
-  }
-}
-
-function safeSetStoredAuth(remember) {
-  if (remember) {
-    try {
-      localStorage.setItem("cartierAuth", "1");
-      return;
-    } catch (error) {
-      // fall through
-    }
-  }
-  try {
-    sessionStorage.setItem("cartierAuth", "1");
-  } catch (error) {
-    // ignore
-  }
 }
 
 function completeLoading() {
@@ -146,12 +99,7 @@ function completeLoading() {
   loadingScreen.classList.add("fade-out");
   setTimeout(() => {
     loadingScreen.classList.add("hidden");
-    const stored = safeGetStoredAuth();
-    if (stored === "1") {
-      showApp();
-    } else {
-      showLogin();
-    }
+    showApp();
   }, 600);
 }
 
@@ -304,32 +252,6 @@ function loadSample(key) {
   bodyField.value = sample.body;
   buildRequestPreview();
   analyze();
-}
-
-function handleLogin(event) {
-  event.preventDefault();
-  const user = loginUser.value.trim();
-  const pass = loginPass.value.trim();
-  if (!user || !pass) {
-    loginError.classList.remove("hidden");
-    return;
-  }
-  loginError.classList.add("hidden");
-  safeSetStoredAuth(rememberBox.checked);
-  showApp();
-}
-
-if (loginForm) {
-  loginForm.addEventListener("submit", handleLogin);
-}
-if (loginButton) {
-  loginButton.addEventListener("click", handleLogin);
-}
-if (skipLoginButton) {
-  skipLoginButton.addEventListener("click", () => {
-    safeSetStoredAuth(false);
-    showApp();
-  });
 }
 
 analyzeButton.addEventListener("click", analyze);
