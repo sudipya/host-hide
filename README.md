@@ -85,7 +85,7 @@ This repo includes `render.yaml` for one-click deployment of the **Java** backen
 4. Click the HIDE HOST icon and use **Scan Current Tab**
 5. Enable **Live Monitor** to watch requests from the current tab
 
-Note: the extension analyzes URLs/requests locally in the popup. Use the **Quick Samples** buttons to see detections instantly.
+Note: the extension analyzes URLs/requests locally in the popup. Use the **Quick Samples** buttons to see detections instantly. Live Monitor also triggers a desktop notification when an anomaly is detected.
 
 ## Next Steps (if time)
 - Add scoring heatmap

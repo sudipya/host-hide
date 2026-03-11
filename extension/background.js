@@ -26,6 +26,8 @@ const SCHEME_REGEX = /\b(file|gopher|dict|ftp|smb|ldap):\/\//gi;
 const MAX_ALERTS = 30;
 let monitoring = false;
 let activeTabId = null;
+let lastNotificationAt = 0;
+const NOTIFY_COOLDOWN_MS = 5000;
 
 function normalize(text) {
   if (!text) return "";
@@ -149,6 +151,20 @@ function decodeRequestBody(details) {
   return "";
 }
 
+function maybeNotify(alert) {
+  const now = Date.now();
+  if (now - lastNotificationAt < NOTIFY_COOLDOWN_MS) {
+    return;
+  }
+  lastNotificationAt = now;
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "icon-128.png",
+    title: "Anomaly detected",
+    message: `${alert.summary.top_attack} indicators found on ${alert.url}`,
+  });
+}
+
 async function addAlert(alert) {
   const stored = await chrome.storage.local.get("alerts");
   const alerts = stored.alerts || [];
@@ -158,6 +174,7 @@ async function addAlert(alert) {
   }
   await chrome.storage.local.set({ alerts });
   chrome.runtime.sendMessage({ type: "alert", alert });
+  maybeNotify(alert);
 }
 
 chrome.webRequest.onBeforeRequest.addListener(
