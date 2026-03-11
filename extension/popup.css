@@ -126,6 +126,26 @@ textarea {
   margin-top: 10px;
 }
 
+.samples {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(8, 14, 30, 0.9);
+  border-radius: 12px;
+}
+
+.sample-buttons {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sample-buttons button {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
 .summary {
   margin-top: 12px;
   padding: 12px;
