@@ -7,6 +7,7 @@ const loginPass = document.getElementById("login-pass");
 const rememberBox = document.getElementById("remember");
 const loginError = document.getElementById("login-error");
 const loginButton = document.getElementById("login-button");
+const skipLoginButton = document.getElementById("skip-login");
 
 const methodField = document.getElementById("method");
 const urlField = document.getElementById("url");
@@ -323,6 +324,12 @@ if (loginForm) {
 }
 if (loginButton) {
   loginButton.addEventListener("click", handleLogin);
+}
+if (skipLoginButton) {
+  skipLoginButton.addEventListener("click", () => {
+    safeSetStoredAuth(false);
+    showApp();
+  });
 }
 
 analyzeButton.addEventListener("click", analyze);

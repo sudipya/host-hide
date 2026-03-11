@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HIDE HOST | Cartier WAF</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=3" />
   </head>
   <body>
     <div id="loading" class="loading-screen">
@@ -46,7 +46,10 @@
             <span class="hint">Demo only</span>
           </div>
 
-          <button id="login-button" type="submit">Enter Console</button>
+          <div class="login-actions">
+            <button id="login-button" type="submit">Enter Console</button>
+            <button id="skip-login" type="button" class="ghost">Continue as Demo</button>
+          </div>
           <p class="hint">Demo access: any username + password.</p>
           <p id="login-error" class="error hidden">Please enter both fields.</p>
         </form>
@@ -139,6 +142,6 @@
       </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>
