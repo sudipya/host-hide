@@ -1,13 +1,3 @@
-const payloadField = document.getElementById("payload");
-const analyzeButton = document.getElementById("analyze");
-const clearButton = document.getElementById("clear");
-const scanTabButton = document.getElementById("scan-tab");
-const summaryEl = document.getElementById("summary");
-const findingsEl = document.getElementById("findings");
-const monitorToggle = document.getElementById("monitor-toggle");
-const alertsList = document.getElementById("alerts-list");
-const clearAlertsButton = document.getElementById("clear-alerts");
-
 const SQLI_RULES = [
   { id: "sqli_union_select", regex: /\bunion\b\s+\bselect\b/i, reason: "UNION SELECT sequence" },
   { id: "sqli_boolean_tautology", regex: /\bor\b\s+1\s*=\s*1\b/i, reason: "Boolean tautology" },
@@ -32,6 +22,10 @@ const RCE_RULES = [
 
 const URL_REGEX = /https?:\/\/[^\s'"<>]+/gi;
 const SCHEME_REGEX = /\b(file|gopher|dict|ftp|smb|ldap):\/\//gi;
+
+const MAX_ALERTS = 30;
+let monitoring = false;
+let activeTabId = null;
 
 function normalize(text) {
   if (!text) return "";
@@ -139,116 +133,84 @@ function analyzeText(payload) {
   };
 }
 
-function render(result) {
-  const { summary, findings } = result;
-  findingsEl.innerHTML = "";
-  summaryEl.classList.remove("safe", "alert");
-
-  if (!summary.attack_detected) {
-    summaryEl.classList.add("safe");
-    summaryEl.innerHTML = "<h3>No obvious attacks</h3><p>The current payload looks clean.</p>";
-    return;
+function decodeRequestBody(details) {
+  if (!details || !details.requestBody) return "";
+  if (details.requestBody.formData) {
+    return JSON.stringify(details.requestBody.formData);
   }
+  if (details.requestBody.raw && details.requestBody.raw.length) {
+    try {
+      const bytes = new Uint8Array(details.requestBody.raw[0].bytes);
+      return new TextDecoder().decode(bytes);
+    } catch (e) {
+      return "";
+    }
+  }
+  return "";
+}
 
-  summaryEl.classList.add("alert");
-  summaryEl.innerHTML = `<h3>Potential attacks detected</h3><p>${summary.count} categories flagged. Top: ${summary.top_attack}.</p>`;
+async function addAlert(alert) {
+  const stored = await chrome.storage.local.get("alerts");
+  const alerts = stored.alerts || [];
+  alerts.unshift(alert);
+  if (alerts.length > MAX_ALERTS) {
+    alerts.splice(MAX_ALERTS);
+  }
+  await chrome.storage.local.set({ alerts });
+  chrome.runtime.sendMessage({ type: "alert", alert });
+}
 
-  findings.forEach((finding) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "finding";
-    wrapper.innerHTML = `
-      <h4>${finding.attack} <small>(${finding.confidence}, score ${finding.score})</small></h4>
-      <div class="evidence"></div>
-    `;
-    const evidenceContainer = wrapper.querySelector(".evidence");
-    finding.evidence.forEach((item) => {
-      const ev = document.createElement("div");
-      ev.innerHTML = `<strong>${item.rule}</strong> — ${item.reason}<br/><span>${item.match}</span>`;
-      evidenceContainer.appendChild(ev);
+chrome.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    if (!monitoring) return;
+    if (activeTabId !== null && details.tabId !== activeTabId) return;
+    const body = decodeRequestBody(details);
+    const payload = `${details.method} ${details.url}\n${body}`;
+    const result = analyzeText(payload);
+    if (!result.summary.attack_detected) return;
+
+    addAlert({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      time: new Date().toISOString(),
+      url: details.url,
+      method: details.method,
+      summary: result.summary,
+      findings: result.findings,
     });
-    findingsEl.appendChild(wrapper);
-  });
-}
+  },
+  { urls: ["<all_urls>"] },
+  ["requestBody"]
+);
 
-function analyzePayload(payload) {
-  const result = analyzeText(payload);
-  render(result);
-}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || !message.type) return;
 
-function renderAlerts(alerts) {
-  alertsList.innerHTML = "";
-  if (!alerts.length) {
-    alertsList.innerHTML = "<p class=\"muted\">No alerts yet.</p>";
-    return;
+  if (message.type === "enableMonitor") {
+    monitoring = true;
+    activeTabId = message.tabId ?? null;
+    chrome.storage.local.set({ alerts: [] });
+    sendResponse({ ok: true });
+    return true;
   }
-  alerts.forEach((alert) => {
-    const el = document.createElement("div");
-    el.className = "alert-item";
-    el.innerHTML = `
-      <strong>${alert.method} ${alert.summary.top_attack}</strong>
-      <small>${alert.url}</small>
-      <small>${new Date(alert.time).toLocaleTimeString()}</small>
-    `;
-    alertsList.appendChild(el);
-  });
-}
 
-function fetchAlerts() {
-  chrome.runtime.sendMessage({ type: "getAlerts" }, (response) => {
-    if (response && response.ok) {
-      renderAlerts(response.alerts);
-    }
-  });
-}
+  if (message.type === "disableMonitor") {
+    monitoring = false;
+    activeTabId = null;
+    sendResponse({ ok: true });
+    return true;
+  }
 
-analyzeButton.addEventListener("click", () => {
-  analyzePayload(payloadField.value.trim());
-});
+  if (message.type === "getAlerts") {
+    chrome.storage.local.get("alerts").then((data) => {
+      sendResponse({ ok: true, alerts: data.alerts || [] });
+    });
+    return true;
+  }
 
-clearButton.addEventListener("click", () => {
-  payloadField.value = "";
-  summaryEl.classList.remove("safe", "alert");
-  summaryEl.innerHTML = "<h3>Ready</h3><p>Scan a tab or paste a request.</p>";
-  findingsEl.innerHTML = "";
-});
-
-scanTabButton.addEventListener("click", () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tab = tabs[0];
-    if (!tab || !tab.url) {
-      return;
-    }
-    payloadField.value = tab.url;
-    analyzePayload(tab.url);
-  });
-});
-
-monitorToggle.addEventListener("change", () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tab = tabs[0];
-    if (!tab) return;
-    if (monitorToggle.checked) {
-      chrome.runtime.sendMessage({ type: "enableMonitor", tabId: tab.id }, () => {
-        fetchAlerts();
-      });
-    } else {
-      chrome.runtime.sendMessage({ type: "disableMonitor" }, () => {
-        fetchAlerts();
-      });
-    }
-  });
-});
-
-clearAlertsButton.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "clearAlerts" }, () => {
-    fetchAlerts();
-  });
-});
-
-chrome.runtime.onMessage.addListener((message) => {
-  if (message && message.type === "alert") {
-    fetchAlerts();
+  if (message.type === "clearAlerts") {
+    chrome.storage.local.set({ alerts: [] }).then(() => {
+      sendResponse({ ok: true });
+    });
+    return true;
   }
 });
-
-fetchAlerts();

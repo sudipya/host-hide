@@ -1,13 +1,17 @@
 {
   "manifest_version": 3,
   "name": "HIDE HOST",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Explainable WAF-style detection for suspicious web requests.",
   "action": {
     "default_popup": "popup.html",
     "default_title": "HIDE HOST"
   },
-  "permissions": ["activeTab", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "tabs", "storage", "webRequest"],
+  "host_permissions": ["<all_urls>"],
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",

@@ -15,6 +15,16 @@
       <button id="scan-tab">Scan Current Tab</button>
     </header>
 
+    <section class="monitor">
+      <div>
+        <label>Live Monitor</label>
+        <p>Watch network requests from the current tab.</p>
+      </div>
+      <div class="toggle">
+        <input id="monitor-toggle" type="checkbox" />
+      </div>
+    </section>
+
     <section class="input">
       <label>Custom Request / URL</label>
       <textarea id="payload" rows="5" placeholder="Paste a URL or request to analyze"></textarea>
@@ -30,6 +40,14 @@
     </section>
 
     <section class="findings" id="findings"></section>
+
+    <section class="alerts">
+      <div class="alerts-header">
+        <h4>Live Alerts</h4>
+        <button id="clear-alerts" class="ghost">Clear</button>
+      </div>
+      <div id="alerts-list" class="alerts-list"></div>
+    </section>
 
     <footer>
       <small>Client-side detection. No data leaves your browser.</small>

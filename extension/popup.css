@@ -63,8 +63,38 @@ button.ghost {
   color: var(--text);
 }
 
+.monitor {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--panel);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.monitor label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.monitor p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.toggle input {
+  width: 40px;
+  height: 20px;
+}
+
 .input {
-  margin-top: 14px;
+  margin-top: 12px;
   padding: 12px;
   background: var(--panel);
   border-radius: 12px;
@@ -157,9 +187,52 @@ textarea {
   border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
+.alerts {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(8, 14, 30, 0.9);
+}
+
+.alerts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alerts-header h4 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.alerts-list {
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.alert-item {
+  padding: 8px;
+  border-radius: 8px;
+  background: #111b33;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--bad);
+}
+
+.alert-item small {
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
 footer {
   margin-top: 8px;
   color: var(--muted);
   font-size: 10px;
   text-align: center;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 11px;
 }
