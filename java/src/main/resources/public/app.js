@@ -6,6 +6,7 @@ const loginUser = document.getElementById("login-user");
 const loginPass = document.getElementById("login-pass");
 const rememberBox = document.getElementById("remember");
 const loginError = document.getElementById("login-error");
+const loginButton = document.getElementById("login-button");
 
 const methodField = document.getElementById("method");
 const urlField = document.getElementById("url");
@@ -82,7 +83,11 @@ const defaultBackend =
   window.location.protocol === "file:"
     ? "http://localhost:8080"
     : window.location.origin;
-backendField.value = defaultBackend;
+if (backendField) {
+  backendField.value = defaultBackend;
+}
+
+let loadingComplete = false;
 
 function showLoading() {
   loadingScreen.classList.remove("hidden");
@@ -100,11 +105,47 @@ function showApp() {
   appScreen.classList.remove("hidden");
 }
 
+function safeGetStoredAuth() {
+  try {
+    const value = localStorage.getItem("cartierAuth");
+    if (value) {
+      return value;
+    }
+  } catch (error) {
+    // ignore
+  }
+  try {
+    return sessionStorage.getItem("cartierAuth");
+  } catch (error) {
+    return null;
+  }
+}
+
+function safeSetStoredAuth(remember) {
+  if (remember) {
+    try {
+      localStorage.setItem("cartierAuth", "1");
+      return;
+    } catch (error) {
+      // fall through
+    }
+  }
+  try {
+    sessionStorage.setItem("cartierAuth", "1");
+  } catch (error) {
+    // ignore
+  }
+}
+
 function completeLoading() {
+  if (loadingComplete) {
+    return;
+  }
+  loadingComplete = true;
   loadingScreen.classList.add("fade-out");
   setTimeout(() => {
     loadingScreen.classList.add("hidden");
-    const stored = localStorage.getItem("cartierAuth") || sessionStorage.getItem("cartierAuth");
+    const stored = safeGetStoredAuth();
     if (stored === "1") {
       showApp();
     } else {
@@ -273,15 +314,16 @@ function handleLogin(event) {
     return;
   }
   loginError.classList.add("hidden");
-  if (rememberBox.checked) {
-    localStorage.setItem("cartierAuth", "1");
-  } else {
-    sessionStorage.setItem("cartierAuth", "1");
-  }
+  safeSetStoredAuth(rememberBox.checked);
   showApp();
 }
 
-loginForm.addEventListener("submit", handleLogin);
+if (loginForm) {
+  loginForm.addEventListener("submit", handleLogin);
+}
+if (loginButton) {
+  loginButton.addEventListener("click", handleLogin);
+}
 
 analyzeButton.addEventListener("click", analyze);
 clearButton.addEventListener("click", clearForm);
@@ -300,7 +342,8 @@ setSummary(null);
 buildRequestPreview();
 loadSamples();
 
+showLoading();
+setTimeout(completeLoading, 1200);
 window.addEventListener("load", () => {
-  showLoading();
-  setTimeout(completeLoading, 1200);
+  setTimeout(completeLoading, 200);
 });
