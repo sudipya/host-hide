@@ -1,3 +1,12 @@
+const loadingScreen = document.getElementById("loading");
+const loginScreen = document.getElementById("login");
+const appScreen = document.getElementById("app");
+const loginForm = document.getElementById("login-form");
+const loginUser = document.getElementById("login-user");
+const loginPass = document.getElementById("login-pass");
+const rememberBox = document.getElementById("remember");
+const loginError = document.getElementById("login-error");
+
 const methodField = document.getElementById("method");
 const urlField = document.getElementById("url");
 const headersField = document.getElementById("headers");
@@ -75,6 +84,35 @@ const defaultBackend =
     : window.location.origin;
 backendField.value = defaultBackend;
 
+function showLoading() {
+  loadingScreen.classList.remove("hidden");
+  loginScreen.classList.add("hidden");
+  appScreen.classList.add("hidden");
+}
+
+function showLogin() {
+  loginScreen.classList.remove("hidden");
+  appScreen.classList.add("hidden");
+}
+
+function showApp() {
+  loginScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
+}
+
+function completeLoading() {
+  loadingScreen.classList.add("fade-out");
+  setTimeout(() => {
+    loadingScreen.classList.add("hidden");
+    const stored = localStorage.getItem("cartierAuth") || sessionStorage.getItem("cartierAuth");
+    if (stored === "1") {
+      showApp();
+    } else {
+      showLogin();
+    }
+  }, 600);
+}
+
 async function loadSamples() {
   try {
     const response = await fetch(`${getBackend()}/api/samples`);
@@ -105,7 +143,7 @@ function setSummary(summary) {
     return;
   }
   if (!summary.attack_detected) {
-    summaryEl.innerHTML = "<h3>No attacks detected</h3><p>Cartier found no obvious attack indicators.</p>";
+    summaryEl.innerHTML = "<h3>No attacks detected</h3><p>HIDE HOST found no obvious attack indicators.</p>";
     return;
   }
   summaryEl.innerHTML = `<h3>Potential attacks detected</h3><p>${summary.count} categories flagged. Top: ${summary.top_attack}.</p>`;
@@ -159,7 +197,7 @@ function buildCurl() {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => `-H "${line.replace(/\"/g, "\\\\\"")}"`)
+    .map((line) => `-H "${line.replace(/\"/g, "\\\"")}"`)
     .join(" ");
   const body = bodyField.value.trim();
   const bodyPart = body ? `--data '${body.replace(/'/g, "'\\''")}'` : "";
@@ -184,7 +222,7 @@ async function analyze() {
     body: bodyField.value.trim(),
   };
 
-  summaryEl.innerHTML = "<h3>Analyzing...</h3><p>Cartier is inspecting the request.</p>";
+  summaryEl.innerHTML = "<h3>Analyzing...</h3><p>HIDE HOST is inspecting the request.</p>";
   findingsEl.innerHTML = "";
 
   try {
@@ -226,6 +264,25 @@ function loadSample(key) {
   analyze();
 }
 
+function handleLogin(event) {
+  event.preventDefault();
+  const user = loginUser.value.trim();
+  const pass = loginPass.value.trim();
+  if (!user || !pass) {
+    loginError.classList.remove("hidden");
+    return;
+  }
+  loginError.classList.add("hidden");
+  if (rememberBox.checked) {
+    localStorage.setItem("cartierAuth", "1");
+  } else {
+    sessionStorage.setItem("cartierAuth", "1");
+  }
+  showApp();
+}
+
+loginForm.addEventListener("submit", handleLogin);
+
 analyzeButton.addEventListener("click", analyze);
 clearButton.addEventListener("click", clearForm);
 checkButton.addEventListener("click", checkHealth);
@@ -242,3 +299,8 @@ Array.from(document.querySelectorAll("[data-sample]")).forEach((button) => {
 setSummary(null);
 buildRequestPreview();
 loadSamples();
+
+window.addEventListener("load", () => {
+  showLoading();
+  setTimeout(completeLoading, 1200);
+});

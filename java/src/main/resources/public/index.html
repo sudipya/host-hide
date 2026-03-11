@@ -3,93 +3,141 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cartier | Explainable WAF Detection</title>
+    <title>HIDE HOST | Cartier WAF</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="page">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">Cartier WAF</p>
-          <h1>Explainable Web Attack Detection</h1>
-          <p class="subtitle">Automated detection for SQLi, XSS, SSRF, and RCE with evidence you can act on.</p>
+    <div id="loading" class="loading-screen">
+      <div class="loading-overlay"></div>
+      <div class="loading-content">
+        <div class="brand-mark">
+          <svg viewBox="0 0 200 140" aria-hidden="true">
+            <path d="M30 110c20-40 120-40 140 0" />
+            <path d="M45 110c18-30 92-30 110 0" />
+            <path d="M60 110c15-22 70-22 80 0" />
+            <path d="M75 110c12-15 40-15 50 0" />
+          </svg>
         </div>
-        <div class="hero-badge">
-          <span>Realtime</span>
-          <span>Evidence-First</span>
-          <span>Hackathon Ready</span>
+        <h1>HIDE HOST</h1>
+        <p class="loading-tag">Explainable WAF Detection by Cartier</p>
+        <div class="loading-dots">
+          <span></span><span></span><span></span>
         </div>
-      </header>
-
-      <main class="grid">
-        <section class="panel input-panel">
-          <h2>Request Builder</h2>
-          <div class="backend-row">
-            <div class="backend-field">
-              <label>Backend URL</label>
-              <input id="backend" type="text" placeholder="http://localhost:8080" />
-            </div>
-            <div class="backend-actions">
-              <button class="ghost" id="check">Check</button>
-              <span id="status" class="status-pill neutral">Not checked</span>
-            </div>
-          </div>
-
-          <label>Method</label>
-          <select id="method">
-            <option>GET</option>
-            <option>POST</option>
-            <option>PUT</option>
-            <option>DELETE</option>
-          </select>
-
-          <label>URL</label>
-          <input id="url" type="text" placeholder="https://shop.example.com/search?q=" />
-
-          <label>Headers</label>
-          <textarea id="headers" rows="4" placeholder="User-Agent: Cartier\nAccept: */*"></textarea>
-
-          <label>Body</label>
-          <textarea id="body" rows="6" placeholder="payload or request body"></textarea>
-
-          <div class="actions">
-            <button id="analyze">Analyze Request</button>
-            <button class="ghost" id="copy">Copy cURL</button>
-            <button class="ghost" id="clear">Clear</button>
-          </div>
-
-          <div class="preview">
-            <p class="section-label">Request Preview</p>
-            <pre id="preview"></pre>
-          </div>
-
-          <div class="samples">
-            <p class="section-label">Quick samples</p>
-            <div class="sample-buttons">
-              <button data-sample="clean">Clean</button>
-              <button data-sample="sqli_union">SQLi Union</button>
-              <button data-sample="sqli_boolean">SQLi Boolean</button>
-              <button data-sample="xss_script">XSS Script</button>
-              <button data-sample="xss_event">XSS Event</button>
-              <button data-sample="ssrf_meta">SSRF Metadata</button>
-              <button data-sample="ssrf_file">SSRF File</button>
-              <button data-sample="rce_chain">RCE Chain</button>
-              <button data-sample="rce_subst">RCE Subst</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel results-panel">
-          <h2>Findings</h2>
-          <div id="summary" class="summary"></div>
-          <div id="findings" class="findings"></div>
-        </section>
-      </main>
-
-      <footer>
-        <p>Cartier highlights attack evidence to help defenders respond faster.</p>
-      </footer>
+      </div>
     </div>
+
+    <div id="login" class="login-screen hidden">
+      <div class="login-card">
+        <p class="eyebrow">HIDE HOST Console</p>
+        <h2>Secure Access</h2>
+        <p class="subtitle">Sign in to review live web-attack evidence.</p>
+        <form id="login-form">
+          <label>Username or Email</label>
+          <input id="login-user" type="text" placeholder="analyst@cartier.ai" />
+
+          <label>Password</label>
+          <input id="login-pass" type="password" placeholder="••••••••" />
+
+          <div class="login-row">
+            <label class="checkbox">
+              <input id="remember" type="checkbox" />
+              Remember me
+            </label>
+            <span class="hint">Demo only</span>
+          </div>
+
+          <button type="submit">Enter Console</button>
+          <p id="login-error" class="error hidden">Please enter both fields.</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="app" class="app hidden">
+      <div class="page">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">HIDE HOST</p>
+            <h1>Explainable Web Attack Detection</h1>
+            <p class="subtitle">Automated detection for SQLi, XSS, SSRF, and RCE with evidence you can act on.</p>
+          </div>
+          <div class="hero-badge">
+            <span>Realtime</span>
+            <span>Evidence-First</span>
+            <span>Analyst Ready</span>
+          </div>
+        </header>
+
+        <main class="grid">
+          <section class="panel input-panel">
+            <h2>Request Builder</h2>
+            <div class="backend-row">
+              <div class="backend-field">
+                <label>Backend URL</label>
+                <input id="backend" type="text" placeholder="http://localhost:8080" />
+              </div>
+              <div class="backend-actions">
+                <button class="ghost" id="check">Check</button>
+                <span id="status" class="status-pill neutral">Not checked</span>
+              </div>
+            </div>
+
+            <label>Method</label>
+            <select id="method">
+              <option>GET</option>
+              <option>POST</option>
+              <option>PUT</option>
+              <option>DELETE</option>
+            </select>
+
+            <label>URL</label>
+            <input id="url" type="text" placeholder="https://shop.example.com/search?q=" />
+
+            <label>Headers</label>
+            <textarea id="headers" rows="4" placeholder="User-Agent: Cartier\nAccept: */*"></textarea>
+
+            <label>Body</label>
+            <textarea id="body" rows="6" placeholder="payload or request body"></textarea>
+
+            <div class="actions">
+              <button id="analyze">Analyze Request</button>
+              <button class="ghost" id="copy">Copy cURL</button>
+              <button class="ghost" id="clear">Clear</button>
+            </div>
+
+            <div class="preview">
+              <p class="section-label">Request Preview</p>
+              <pre id="preview"></pre>
+            </div>
+
+            <div class="samples">
+              <p class="section-label">Quick samples</p>
+              <div class="sample-buttons">
+                <button data-sample="clean">Clean</button>
+                <button data-sample="sqli_union">SQLi Union</button>
+                <button data-sample="sqli_boolean">SQLi Boolean</button>
+                <button data-sample="xss_script">XSS Script</button>
+                <button data-sample="xss_event">XSS Event</button>
+                <button data-sample="ssrf_meta">SSRF Metadata</button>
+                <button data-sample="ssrf_file">SSRF File</button>
+                <button data-sample="rce_chain">RCE Chain</button>
+                <button data-sample="rce_subst">RCE Subst</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel results-panel">
+            <h2>Findings</h2>
+            <div id="summary" class="summary"></div>
+            <div id="findings" class="findings"></div>
+          </section>
+        </main>
+
+        <footer>
+          <p>HIDE HOST highlights attack evidence to help defenders respond faster.</p>
+        </footer>
+      </div>
+    </div>
+
     <script src="app.js"></script>
   </body>
 </html>
