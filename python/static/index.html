@@ -1,117 +1,110 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>HIDE HOST | Cartier WAF</title>
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <title>Slide2Quiz</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="loading" class="loading-screen">
-      <div class="loading-overlay"></div>
-      <div class="loading-content">
-        <div class="brand-mark">
-          <svg viewBox="0 0 200 140" aria-hidden="true">
-            <path d="M30 110c20-40 120-40 140 0" />
-            <path d="M45 110c18-30 92-30 110 0" />
-            <path d="M60 110c15-22 70-22 80 0" />
-            <path d="M75 110c12-15 40-15 50 0" />
-          </svg>
-        </div>
-        <h1>HIDE HOST</h1>
-        <p class="loading-tag">Explainable WAF Detection by Cartier</p>
-        <div class="loading-dots">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-    </div>
-
-    <div id="app" class="app hidden">
-      <div class="page">
-        <header class="hero">
-          <div>
-            <p class="eyebrow">HIDE HOST</p>
-            <h1>Explainable Web Attack Detection</h1>
-            <p class="subtitle">Automated detection for SQLi, XSS, SSRF, and RCE with evidence you can act on.</p>
+    <div class="bg"></div>
+    <div class="page">
+      <header class="hero">
+        <div class="badge">PPT → Quiz Generator</div>
+        <h1>Turn slides into quizzes in minutes.</h1>
+        <p>
+          Upload a PowerPoint, choose difficulty, and get a ready-to-use quiz with
+          answers. Built to demo fast and wire to your API.
+        </p>
+        <div class="hero-meta">
+          <div class="meta-card">
+            <span>Input</span>
+            <strong>PPT/PPTX</strong>
           </div>
-          <div class="hero-badge">
-            <span>Realtime</span>
-            <span>Evidence-First</span>
-            <span>Analyst Ready</span>
+          <div class="meta-card">
+            <span>Modes</span>
+            <strong>Easy · Medium · Hard</strong>
           </div>
-        </header>
+          <div class="meta-card">
+            <span>Output</span>
+            <strong>MCQs + Answers</strong>
+          </div>
+        </div>
+      </header>
 
-        <main class="grid">
-          <section class="panel input-panel">
-            <h2>Request Builder</h2>
-            <div class="backend-row">
-              <div class="backend-field">
-                <label>Backend URL</label>
-                <input id="backend" type="text" placeholder="http://localhost:8080" />
+      <main class="grid">
+        <section class="panel">
+          <h2>Create Quiz</h2>
+          <form id="quiz-form" class="form">
+            <label class="field">
+              <span>PowerPoint file</span>
+              <input id="ppt-file" type="file" accept=".ppt,.pptx" />
+              <small id="file-hint">PPTX recommended (PPT may not parse).</small>
+            </label>
+
+            <div class="field">
+              <span>Difficulty</span>
+              <div class="difficulty" id="difficulty-group">
+                <button type="button" class="pill active" data-value="easy">Easy</button>
+                <button type="button" class="pill" data-value="medium">Medium</button>
+                <button type="button" class="pill" data-value="hard">Hard</button>
               </div>
-              <div class="backend-actions">
-                <button class="ghost" id="check">Check</button>
-                <span id="status" class="status-pill neutral">Not checked</span>
-              </div>
+              <input type="hidden" id="difficulty" value="easy" />
             </div>
 
-            <label>Method</label>
-            <select id="method">
-              <option>GET</option>
-              <option>POST</option>
-              <option>PUT</option>
-              <option>DELETE</option>
-            </select>
+            <label class="field">
+              <span>Number of questions</span>
+              <input id="question-count" type="number" min="3" max="20" value="8" />
+            </label>
 
-            <label>URL</label>
-            <input id="url" type="text" placeholder="https://shop.example.com/search?q=" />
-
-            <label>Headers</label>
-            <textarea id="headers" rows="4" placeholder="User-Agent: Cartier\nAccept: */*"></textarea>
-
-            <label>Body</label>
-            <textarea id="body" rows="6" placeholder="payload or request body"></textarea>
+            <label class="field">
+              <span>Quiz API endpoint (optional)</span>
+              <input
+                id="api-url"
+                type="url"
+                placeholder="https://api.yourapp.com/api/quiz"
+              />
+              <small>Leave blank to use the built-in demo backend at /api/quiz.</small>
+            </label>
 
             <div class="actions">
-              <button id="analyze">Analyze Request</button>
-              <button class="ghost" id="copy">Copy cURL</button>
-              <button class="ghost" id="clear">Clear</button>
+              <button id="generate" class="primary" type="submit">Generate Quiz</button>
+              <button id="reset" class="ghost" type="button">Reset</button>
             </div>
+          </form>
 
-            <div class="preview">
-              <p class="section-label">Request Preview</p>
-              <pre id="preview"></pre>
+          <div class="status neutral" id="status">Ready to generate.</div>
+
+          <div class="tips">
+            <h3>Fast setup</h3>
+            <ul>
+              <li>Upload PPT or PPTX</li>
+              <li>Select difficulty level</li>
+              <li>Click generate and share</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel results">
+          <div class="results-header">
+            <div>
+              <h2 id="result-title">No quiz yet</h2>
+              <p id="result-meta">Upload a PPT to see questions here.</p>
             </div>
-
-            <div class="samples">
-              <p class="section-label">Quick samples</p>
-              <div class="sample-buttons">
-                <button data-sample="clean">Clean</button>
-                <button data-sample="sqli_union">SQLi Union</button>
-                <button data-sample="sqli_boolean">SQLi Boolean</button>
-                <button data-sample="xss_script">XSS Script</button>
-                <button data-sample="xss_event">XSS Event</button>
-                <button data-sample="ssrf_meta">SSRF Metadata</button>
-                <button data-sample="ssrf_file">SSRF File</button>
-                <button data-sample="rce_chain">RCE Chain</button>
-                <button data-sample="rce_subst">RCE Subst</button>
-              </div>
+            <div class="results-actions">
+              <button id="copy-json" class="ghost" disabled>Copy JSON</button>
             </div>
-          </section>
+          </div>
 
-          <section class="panel results-panel">
-            <h2>Findings</h2>
-            <div id="summary" class="summary"></div>
-            <div id="findings" class="findings"></div>
-          </section>
-        </main>
+          <div id="questions" class="question-list">
+            <div class="empty">Your generated quiz will appear here.</div>
+          </div>
+        </section>
+      </main>
 
-        <footer>
-          <p>HIDE HOST highlights attack evidence to help defenders respond faster.</p>
-        </footer>
-      </div>
+      <footer class="foot">Built for speed. Swap in your API when ready.</footer>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js"></script>
   </body>
 </html>

